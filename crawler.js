@@ -220,7 +220,7 @@ Crawler.prototype._crawlUrl = function(url, referer, depth) {
     //console.log('analyzing url = ', url);
     var isTextContent = self._isTextContent(response);
     var body = isTextContent ? self._getDecodedBody(response) : '<<...binary content (omitted by js-crawler)...>>';
-
+    var statusCode = response ? response.statusCode : undefined;
     if (!error && (response.statusCode === 200)) {
       //If no redirects, then response.request.uri.href === url, otherwise last url
       var lastUrlInRedirectChain = response.request.uri.href;
@@ -235,7 +235,7 @@ Crawler.prototype._crawlUrl = function(url, referer, depth) {
           body: body
         });
         self.knownUrls[lastUrlInRedirectChain] = true;
-        self.crawledUrls.push(lastUrlInRedirectChain);
+        self.crawledUrls.push([statusCode, lastUrlInRedirectChain]);
         if (depth > 1 && isTextContent) {
           self._crawlUrls(self._getAllUrls(lastUrlInRedirectChain, body), lastUrlInRedirectChain, depth - 1);
         }
@@ -249,7 +249,7 @@ Crawler.prototype._crawlUrl = function(url, referer, depth) {
         response: response,
         body: body
       });
-      self.crawledUrls.push(url);
+      self.crawledUrls.push([statusCode,url]);
     }
   });
 };
