@@ -306,7 +306,7 @@ Crawler.prototype._getAllUrls = function(defaultBaseUrl, body) {
   var baseUrl = this._getBaseUrl(defaultBaseUrl, body);
   var linksRegex = self.ignoreRelative ? /<a[^>]+?href=".*?:\/\/.*?"/gmi : /<a[^>]+?href=".*?"/gmi;
   var links = body.match(linksRegex) || [];
-
+  
   //console.log('body = ', body);
   var urls = _.chain(links)
     .map(function(link) {
@@ -322,7 +322,37 @@ Crawler.prototype._getAllUrls = function(defaultBaseUrl, body) {
      })
     .value();
 
+  var srcUrls = self._getUrlsFromTags(body, 'img', 'src');
+  var linkTagUrls = self._getUrlsFromTags(body, 'link', 'href');
+  var allUrls = srcUrls.concat(urls, srcUrls, linkTagUrls);
   //console.log('urls to crawl = ', urls);
+  return allUrls;
+};
+
+Crawler.prototype._getUrlsFromTags = function(body, tagName, attr) {
+  var self = this;
+  var srcRegex = new RegExp('<'+tagName+'[^>]+?'+attr+'=".*?"', 'gmi');
+  var eles = body.match(srcRegex) || [];
+  
+  if(!eles.length){
+    return eles;
+  }
+  
+  var urls = _.chain(eles)
+    .map(function(link) {
+      var regexp = new RegExp(''+attr+'=\"(.*?)[#\"]', 'i');
+      var match = regexp.exec(link);
+
+      link = match[1];
+      
+      return link;
+    })
+    .uniq()
+    .filter(function(link) {
+      return self._isLinkProtocolSupported(link) && self.shouldCrawl(link);
+    })
+    .value();
+
   return urls;
 };
 

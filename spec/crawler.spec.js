@@ -77,6 +77,11 @@ Link c\
         .toEqual([]);
     });
 
+    it('should get img src urls', function(){
+      expect(crawler._getUrlsFromTags('<img src="http://someotherhost/media/images/resource.png" />', 'img', 'src'))
+        .toEqual(['http://someotherhost/media/images/resource.png']);
+    });
+
     describe('ignoreRelative option', function() {
 
       describe('enabled', function() {
@@ -160,7 +165,7 @@ Link c\
       });
     });
 
-    describe('base url specified in HTML', () => {
+    describe('base url specified in HTML', function() {
 
       var defaultBaseUrl = 'http://localhost:8080/defaultbase/';
       var specifiedAbsoluteBaseUrl = 'http://localhost:8080/specifiedabsolutebase/';
@@ -353,7 +358,7 @@ Link c\
         it('should add url to the list of known urls', function() {
           expect(crawler.crawledUrls).toEqual([]);
           crawler._crawlUrl(url, referer, depth);
-          expect(crawler.crawledUrls).toEqual([url]);
+          expect(crawler.crawledUrls).toEqual([[200, url]]);
         });
 
         describe('content type', function() {
